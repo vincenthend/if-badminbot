@@ -1,0 +1,9 @@
+{
+  "extends": [
+    "./node_modules/@vincenthend/eslint-config/typescript.eslintrc"
+  ],
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  },
+  "ignorePatterns": ["**/*.js"]
+}

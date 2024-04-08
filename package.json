@@ -1,0 +1,19 @@
+{
+  "name": "@vincenthend/esbuild-node-template",
+  "private": true,
+  "version": "0.2.0",
+  "main": "dist/index.js",
+  "scripts": {
+    "publish": "clasp push",
+    "dev": "clasp push --watch"
+  },
+  "dependencies": {
+    "@vincenthend/eslint-config": "github:vincenthend/codeguide"
+  },
+  "devDependencies": {
+    "@types/google-apps-script": "^1.0.83",
+    "ts-patch": "^3.1.2",
+    "typescript": "^5.4.4",
+    "typescript-transform-paths": "^3.4.3"
+  }
+}

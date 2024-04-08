@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "baseUrl": "./",
+    "paths": {
+      "src/*": ["src/*"]
+    },
+    "lib": ["esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "outDir": "dist",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "incremental": true,
+    "types": ["@types/google-apps-script"]
+  },
+  "exclude": [
+    "node_modules"
+  ],
+  "plugins": [
+    { "transform": "typescript-transform-paths" },
+    { "transform": "typescript-transform-paths", "afterDeclarations": true }
+  ],
+}
