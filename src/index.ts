@@ -1,9 +1,11 @@
 import * as Functions from './functions'
 import { scanRange } from 'src/functions/scan_range'
-import { sendAlert } from 'src/utils/alert'
+import { sendError } from 'src/utils/alert'
 
 const _scanEventsToday = Functions.scanEventsToday
-const _scanEvents5Days = Functions.scanEvents5Days
+const _scanEvents5Days = Functions.scanEventsNDays
+const _sendRegisterReminder = Functions.sendRegisterReminder
+const _debugListEvents = Functions.debugListEvents
 
 function doPost(e: GoogleAppsScript.Events.DoPost) {
   try {
@@ -21,7 +23,7 @@ function doPost(e: GoogleAppsScript.Events.DoPost) {
       ContentService.MimeType.JSON,
     )
   } catch (e) {
-    sendAlert(e as Error)
+    sendError(e as Error)
     return ContentService.createTextOutput(JSON.stringify({ success: false })).setMimeType(
       ContentService.MimeType.JSON,
     )

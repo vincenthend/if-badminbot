@@ -2,7 +2,7 @@ import { tAPI } from 'src/constants'
 import { CalendarEvent } from 'src/types'
 import { formatDate, formatTime } from 'src/utils'
 import { getNextNDaysEvents } from 'src/utils/events'
-import { sendAlert } from 'src/utils/alert'
+import { sendError } from 'src/utils/alert'
 import { TelegramAPI } from 'src/apis/telegram/types'
 
 function sendReminder(events: CalendarEvent[], channelId: number) {
@@ -40,6 +40,6 @@ export function scanRange(channelId: number) {
     const events = getNextNDaysEvents(0, 7)
     sendReminder(events, channelId)
   } catch (e) {
-    sendAlert(e as Error)
+    sendError(e as Error)
   }
 }
