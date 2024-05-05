@@ -2,11 +2,11 @@ import { CHANNEL_IDS, tAPI } from 'src/constants'
 import { CalendarEvent } from 'src/types'
 import { formatDate, formatTime } from 'src/utils'
 import { getNextNDaysEvents } from 'src/utils/events'
-import { sendAlert } from 'src/utils/alert'
+import { sendError } from 'src/utils/alert'
 import { TelegramAPI } from 'src/apis/telegram/types'
 import { setMessageIdByEvent } from 'src/utils/store'
 
-const SCAN_RANGE = 5
+const SCAN_RANGE = 14
 
 function sendReminder(event: CalendarEvent) {
   const targetChannels = CHANNEL_IDS.filter((channel) =>
@@ -33,7 +33,7 @@ React di message ini ya kalo mau join!
   }
 }
 
-export function scanEvents5Days() {
+export function scanEventsNDays() {
   try {
     const events = getNextNDaysEvents(SCAN_RANGE)
     if (events.length) {
@@ -42,6 +42,6 @@ export function scanEvents5Days() {
       }
     }
   } catch (e) {
-    sendAlert(e as Error)
+    sendError(e as Error)
   }
 }

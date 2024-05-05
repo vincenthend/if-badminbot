@@ -30,8 +30,8 @@ export function setMessageIdByEvent(
   if (sheet) {
     sheet
       .insertRowBefore(1)
-      .getRange(1, 1, 1, 2)
-      .setValues([[`${event.getId()}_${channelId}`, messageId]])
+      .getRange(1, 1, 1, 3)
+      .setValues([[`${event.getId()}_${channelId}`, messageId, event.getEndTime().getTime()]])
     return
   }
 

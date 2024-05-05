@@ -4,7 +4,7 @@
   "version": "0.2.0",
   "main": "dist/index.js",
   "scripts": {
-    "publish": "clasp push",
+    "publish": "rollup -c && clasp push",
     "dev": "rollup -c --watch",
     "clasp:dev": "clasp push --watch"
   },

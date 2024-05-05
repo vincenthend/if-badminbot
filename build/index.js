@@ -19,16 +19,41 @@ const SPREADSHEET_ID = '1cf5yMNXceKOq5F_obU-8dPzk6bH6PTDEr6Aa4PG6yGU';
 const ALERT_CHANNEL = -4042384933;
 const CHANNEL_IDS = [{
   // TEST ENV
-  channel_id: ALERT_CHANNEL
+  channel_id: ALERT_CHANNEL,
+  channel_name: 'ALERT'
 }, {
   // ALUMNI IF
   test: event => {
     const title = event.getTitle();
     return !title.toLowerCase().includes('reserved');
   },
-  channel_id: -4052020064
+  channel_id: -4052020064,
+  channel_name: 'BADMIN_IF'
 }];
 const tAPI = createTelegramRequest(TELEGRAM_TOKEN);
+
+const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
+var SpreadsheetPage = /*#__PURE__*/function (SpreadsheetPage) {
+  SpreadsheetPage["MESSAGE_ID"] = "msg_id";
+  return SpreadsheetPage;
+}(SpreadsheetPage || {});
+function getMessageIdByEvent(event, channelId) {
+  const sheet = spreadsheet.getSheetByName(SpreadsheetPage.MESSAGE_ID);
+  if (sheet) {
+    const range = sheet?.getRange(1, 1, sheet.getLastRow(), 2).getValues();
+    const result = range.find(([eventId]) => eventId === `${event.getId()}_${channelId}`);
+    return result ? Number(result[1]) : null;
+  }
+  throw new Error('Message ID sheet is missing');
+}
+function setMessageIdByEvent(event, channelId, messageId) {
+  const sheet = spreadsheet.getSheetByName(SpreadsheetPage.MESSAGE_ID);
+  if (sheet) {
+    sheet.insertRowBefore(1).getRange(1, 1, 1, 3).setValues([[`${event.getId()}_${channelId}`, messageId, event.getEndTime().getTime()]]);
+    return;
+  }
+  throw new Error('Message ID sheet is missing');
+}
 
 function formatTime(time) {
   return `${time.getHours().toLocaleString('en-US', {
@@ -48,18 +73,6 @@ function formatDate(time) {
   })}`;
 }
 
-function getNextNDaysEvents(start = 0, end = start) {
-  const calendar = CalendarApp.getCalendarById(CALENDAR_ID);
-  const nextNDaysStart = new Date();
-  nextNDaysStart.setDate(nextNDaysStart.getDate() + start);
-  nextNDaysStart.setHours(0, 0, 0, 0);
-  const nextNDaysEnd = new Date();
-  nextNDaysEnd.setDate(nextNDaysEnd.getDate() + end);
-  nextNDaysEnd.setHours(23, 59, 59, 999);
-  const events = calendar.getEvents(nextNDaysStart, nextNDaysEnd);
-  return events;
-}
-
 /* eslint-disable @typescript-eslint/naming-convention */
 let TelegramAPI = /*#__PURE__*/function (TelegramAPI) {
   TelegramAPI["SEND_MESSAGE"] = "sendMessage";
@@ -68,7 +81,7 @@ let TelegramAPI = /*#__PURE__*/function (TelegramAPI) {
   return TelegramAPI;
 }({});
 
-function sendAlert(error) {
+function sendError(error) {
   const message = `
 🚨*ALERT*
 Badmin Bot has thrown an error!
@@ -84,8 +97,58 @@ ${typeof error === 'string' ? error : error?.message}
     parse_mode: 'Markdown'
   });
 }
+function sendWarning(error) {
+  const message = `
+⚠️*WARNING*
+Warning from Badmin Bot
+\`\`\`
+${typeof error === 'string' ? error : error?.message}
+\`\`\`
+`;
+  tAPI(TelegramAPI.SEND_MESSAGE, {
+    chat_id: ALERT_CHANNEL,
+    text: message,
+    parse_mode: 'Markdown'
+  });
+}
 
-function sendReminder$2(event) {
+function getNextNDaysEvents(start = 0, end = start) {
+  const calendar = CalendarApp.getCalendarById(CALENDAR_ID);
+  const nextNDaysStart = new Date();
+  nextNDaysStart.setDate(nextNDaysStart.getDate() + start);
+  nextNDaysStart.setHours(0, 0, 0, 0);
+  const nextNDaysEnd = new Date();
+  nextNDaysEnd.setDate(nextNDaysEnd.getDate() + end);
+  nextNDaysEnd.setHours(23, 59, 59, 999);
+  return calendar.getEvents(nextNDaysStart, nextNDaysEnd);
+}
+function getEventsRegistrationMsg(event, channel) {
+  const messageId = getMessageIdByEvent(event, channel.channel_id);
+  if (!messageId) sendWarning(`Failed to find message to reply to for event:
+Event: ${event.getTitle()} - ${formatDate(event.getStartTime())}(${event.getId()}) 
+Channel: ${channel.channel_id} (${channel.channel_name})
+`);
+  return [channel.channel_id, messageId];
+}
+
+function debugListEvents() {
+  try {
+    const events = getNextNDaysEvents(0, 14);
+    const eventList = events.map(event => `- ${event.getId()} - ${event.getStartTime().getTime()}`).join('\n');
+    tAPI(TelegramAPI.SEND_MESSAGE, {
+      chat_id: ALERT_CHANNEL,
+      text: `Events List: 
+
+${eventList}
+    `,
+      parse_mode: 'Markdown'
+    });
+  } catch (e) {
+    sendError(e);
+  }
+}
+
+function sendReminder$3(event) {
   const response = Maps.newGeocoder().geocode(event.getLocation());
   const result = response.results[0];
 
@@ -99,56 +162,46 @@ Reminder hari ini bakal ada badmin di:
 ⏰ *Waktu*: ${formatTime(event.getStartTime())} - ${formatTime(event.getEndTime())}
 📍 *Tempat*: ${event.getLocation()}
 
-
 `;
-  for (const channel of targetChannels) {
+  targetChannels.map(channel => getEventsRegistrationMsg(event, channel)).forEach(([channel_id, messageId]) => {
     tAPI(TelegramAPI.SEND_MESSAGE, {
-      chat_id: channel.channel_id,
+      chat_id: channel_id,
       text: messageText,
-      parse_mode: 'Markdown'
+      parse_mode: 'Markdown',
+      reply_parameters: {
+        chat_id: messageId,
+        allow_sending_without_reply: true
+      }
     });
     tAPI(TelegramAPI.SEND_VENUE, {
-      chat_id: channel.channel_id,
+      chat_id: channel_id,
       address: result.formatted_address,
       latitude: result.geometry.location.lat,
       longitude: result.geometry.location.lng,
       title: event.getLocation(),
       google_place_id: result.place_id
     });
-  }
+  });
 }
 function scanEventsToday() {
   try {
     const events = getNextNDaysEvents();
     if (events.length) {
       for (const event of events) {
-        sendReminder$2(event);
+        sendReminder$3(event);
       }
     }
   } catch (e) {
-    sendAlert(e);
+    sendError(e);
   }
 }
 
-const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
-var SpreadsheetPage = /*#__PURE__*/function (SpreadsheetPage) {
-  SpreadsheetPage["MESSAGE_ID"] = "msg_id";
-  return SpreadsheetPage;
-}(SpreadsheetPage || {});
-function setMessageIdByEvent(event, channelId, messageId) {
-  const sheet = spreadsheet.getSheetByName(SpreadsheetPage.MESSAGE_ID);
-  if (sheet) {
-    sheet.insertRowBefore(1).getRange(1, 1, 1, 2).setValues([[`${event.getId()}_${channelId}`, messageId]]);
-    return;
-  }
-  throw new Error('Message ID sheet is missing');
-}
-
-function sendReminder$1(event) {
+const SCAN_RANGE = 14;
+function sendReminder$2(event) {
   const targetChannels = CHANNEL_IDS.filter(channel => channel.test ? channel.test(event) : true);
   const messageText = `
 *[🏸 Open Registration!]*
-Hello! Kita bakal ada badmin 5 hari lagi di:
+Hello! Kita bakal ada badmin ${SCAN_RANGE} hari lagi di:
     
 📅 *Tanggal*: ${formatDate(event.getStartTime())}
 ⏰ *Waktu*: ${formatTime(event.getStartTime())} - ${formatTime(event.getEndTime())}
@@ -165,16 +218,51 @@ React di message ini ya kalo mau join!
     setMessageIdByEvent(event, channel.channel_id, message.message_id);
   }
 }
-function scanEvents5Days() {
+function scanEventsNDays() {
   try {
-    const events = getNextNDaysEvents(5, 7);
+    const events = getNextNDaysEvents(SCAN_RANGE);
     if (events.length) {
       for (const event of events) {
-        sendReminder$1(event);
+        sendReminder$2(event);
       }
     }
   } catch (e) {
-    sendAlert(e);
+    sendError(e);
+  }
+}
+
+const SCAN_RANGES = [7, 3];
+function sendReminder$1(event, range) {
+  const targetChannels = CHANNEL_IDS.filter(channel => channel.test ? channel.test(event) : true);
+  const messageText = `
+*[🏸 Registration Reminder!]*
+Hallo! Bakal ada badmin dalam ${range} hari lho!
+Jangan lupa register di message sebelumnya ya~
+`;
+  targetChannels.map(channel => getEventsRegistrationMsg(event, channel)).forEach(([channelId, messageId]) => {
+    tAPI(TelegramAPI.SEND_MESSAGE, {
+      chat_id: channelId,
+      text: messageText,
+      parse_mode: 'Markdown',
+      reply_parameters: {
+        chat_id: messageId,
+        allow_sending_without_reply: false
+      }
+    });
+  });
+}
+function sendRegisterReminder() {
+  try {
+    SCAN_RANGES.forEach(range => {
+      const events = getNextNDaysEvents(range);
+      if (events.length) {
+        for (const event of events) {
+          sendReminder$1(event, range);
+        }
+      }
+    });
+  } catch (e) {
+    sendError(e);
   }
 }
 
@@ -206,12 +294,14 @@ function scanRange(channelId) {
     const events = getNextNDaysEvents(0, 7);
     sendReminder(events, channelId);
   } catch (e) {
-    sendAlert(e);
+    sendError(e);
   }
 }
 
 const _scanEventsToday = scanEventsToday;
-const _scanEvents5Days = scanEvents5Days;
+const _scanEvents5Days = scanEventsNDays;
+const _sendRegisterReminder = sendRegisterReminder;
+const _debugListEvents = debugListEvents;
 function doPost(e) {
   try {
     const data = JSON.parse(e.postData.contents);
@@ -224,7 +314,7 @@ function doPost(e) {
       success: true
     })).setMimeType(ContentService.MimeType.JSON);
   } catch (e) {
-    sendAlert(e);
+    sendError(e);
     return ContentService.createTextOutput(JSON.stringify({
       success: false
     })).setMimeType(ContentService.MimeType.JSON);

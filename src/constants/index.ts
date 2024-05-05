@@ -12,6 +12,7 @@ export const CHANNEL_IDS: ChannelData[] = [
   {
     // TEST ENV
     channel_id: ALERT_CHANNEL,
+    channel_name: 'ALERT',
   },
   {
     // ALUMNI IF
@@ -20,6 +21,7 @@ export const CHANNEL_IDS: ChannelData[] = [
       return !title.toLowerCase().includes('reserved')
     },
     channel_id: -4052020064,
+    channel_name: 'BADMIN_IF',
   },
 ]
 

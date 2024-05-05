@@ -9,6 +9,17 @@ export interface SendMessageRequest {
   chat_id: number
   text: string
   parse_mode: 'Markdown'
+  reply_parameters?: ReplyParameters
+}
+
+export interface ReplyParameters {
+  message_id: number
+  chat_id?: number
+  allow_sending_without_reply?: boolean
+  quote?: string
+  quote_parse_mode?: string
+  quote_entities?: []
+  quote_position?: number
 }
 
 export interface SendMessageResponse {
