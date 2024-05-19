@@ -27,7 +27,7 @@ const CHANNEL_IDS = [{
     const title = event.getTitle();
     return !title.toLowerCase().includes('reserved');
   },
-  channel_id: -4052020064,
+  channel_id: -1002140497406,
   channel_name: 'BADMIN_IF'
 }];
 const tAPI = createTelegramRequest(TELEGRAM_TOKEN);

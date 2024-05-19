@@ -19,15 +19,19 @@ Jangan lupa register di message sebelumnya ya~
   targetChannels
     .map((channel) => getEventsRegistrationMsg(event, channel))
     .forEach(([channelId, messageId]) => {
-      tAPI(TelegramAPI.SEND_MESSAGE, {
-        chat_id: channelId,
-        text: messageText,
-        parse_mode: 'Markdown',
-        reply_parameters: {
-          chat_id: messageId,
-          allow_sending_without_reply: false,
-        },
-      })
+      try {
+        tAPI(TelegramAPI.SEND_MESSAGE, {
+          chat_id: channelId,
+          text: messageText,
+          parse_mode: 'Markdown',
+          reply_parameters: {
+            chat_id: messageId,
+            allow_sending_without_reply: false,
+          },
+        })
+      } catch (e) {
+        sendError(e as Error)
+      }
     })
 }
 
