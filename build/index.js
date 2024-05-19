@@ -170,7 +170,7 @@ Reminder hari ini bakal ada badmin di:
         text: messageText,
         parse_mode: 'Markdown',
         reply_parameters: {
-          chat_id: messageId,
+          message_id: messageId,
           allow_sending_without_reply: true
         }
       });
@@ -210,6 +210,9 @@ Hello! Kita bakal ada badmin ${SCAN_RANGE} hari lagi di:
 📅 *Tanggal*: ${formatDate(event.getStartTime())}
 ⏰ *Waktu*: ${formatTime(event.getStartTime())} - ${formatTime(event.getEndTime())}
 📍 *Tempat*: ${event.getLocation()}
+💵 *Price*: S$7 per pax
+
+${event.getDescription()}
 
 React di message ini ya kalo mau join!
 `;
@@ -250,7 +253,7 @@ Jangan lupa register di message sebelumnya ya~
         text: messageText,
         parse_mode: 'Markdown',
         reply_parameters: {
-          chat_id: messageId,
+          message_id: messageId,
           allow_sending_without_reply: false
         }
       });

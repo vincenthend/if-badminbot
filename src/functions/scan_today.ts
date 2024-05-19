@@ -31,7 +31,7 @@ Reminder hari ini bakal ada badmin di:
           text: messageText,
           parse_mode: 'Markdown',
           reply_parameters: {
-            chat_id: messageId,
+            message_id: messageId,
             allow_sending_without_reply: true,
           },
         })
