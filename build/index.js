@@ -27,7 +27,7 @@ const CHANNEL_IDS = [{
     const title = event.getTitle();
     return !title.toLowerCase().includes('reserved');
   },
-  channel_id: -4052020064,
+  channel_id: -1002140497406,
   channel_name: 'BADMIN_IF'
 }];
 const tAPI = createTelegramRequest(TELEGRAM_TOKEN);
@@ -164,23 +164,27 @@ Reminder hari ini bakal ada badmin di:
 
 `;
   targetChannels.map(channel => getEventsRegistrationMsg(event, channel)).forEach(([channel_id, messageId]) => {
-    tAPI(TelegramAPI.SEND_MESSAGE, {
-      chat_id: channel_id,
-      text: messageText,
-      parse_mode: 'Markdown',
-      reply_parameters: {
-        chat_id: messageId,
-        allow_sending_without_reply: true
-      }
-    });
-    tAPI(TelegramAPI.SEND_VENUE, {
-      chat_id: channel_id,
-      address: result.formatted_address,
-      latitude: result.geometry.location.lat,
-      longitude: result.geometry.location.lng,
-      title: event.getLocation(),
-      google_place_id: result.place_id
-    });
+    try {
+      tAPI(TelegramAPI.SEND_MESSAGE, {
+        chat_id: channel_id,
+        text: messageText,
+        parse_mode: 'Markdown',
+        reply_parameters: {
+          message_id: messageId,
+          allow_sending_without_reply: true
+        }
+      });
+      tAPI(TelegramAPI.SEND_VENUE, {
+        chat_id: channel_id,
+        address: result.formatted_address,
+        latitude: result.geometry.location.lat,
+        longitude: result.geometry.location.lng,
+        title: event.getLocation(),
+        google_place_id: result.place_id
+      });
+    } catch (e) {
+      sendError(e);
+    }
   });
 }
 function scanEventsToday() {
@@ -206,6 +210,9 @@ Hello! Kita bakal ada badmin ${SCAN_RANGE} hari lagi di:
 📅 *Tanggal*: ${formatDate(event.getStartTime())}
 ⏰ *Waktu*: ${formatTime(event.getStartTime())} - ${formatTime(event.getEndTime())}
 📍 *Tempat*: ${event.getLocation()}
+💵 *Price*: S$7 per pax
+
+${event.getDescription()}
 
 React di message ini ya kalo mau join!
 `;
@@ -240,15 +247,19 @@ Hallo! Bakal ada badmin dalam ${range} hari lho!
 Jangan lupa register di message sebelumnya ya~
 `;
   targetChannels.map(channel => getEventsRegistrationMsg(event, channel)).forEach(([channelId, messageId]) => {
-    tAPI(TelegramAPI.SEND_MESSAGE, {
-      chat_id: channelId,
-      text: messageText,
-      parse_mode: 'Markdown',
-      reply_parameters: {
-        chat_id: messageId,
-        allow_sending_without_reply: false
-      }
-    });
+    try {
+      tAPI(TelegramAPI.SEND_MESSAGE, {
+        chat_id: channelId,
+        text: messageText,
+        parse_mode: 'Markdown',
+        reply_parameters: {
+          message_id: messageId,
+          allow_sending_without_reply: false
+        }
+      });
+    } catch (e) {
+      sendError(e);
+    }
   });
 }
 function sendRegisterReminder() {

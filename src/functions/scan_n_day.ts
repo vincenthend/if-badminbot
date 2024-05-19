@@ -19,6 +19,9 @@ Hello! Kita bakal ada badmin ${SCAN_RANGE} hari lagi di:
 📅 *Tanggal*: ${formatDate(event.getStartTime() as Date)}
 ⏰ *Waktu*: ${formatTime(event.getStartTime() as Date)} - ${formatTime(event.getEndTime() as Date)}
 📍 *Tempat*: ${event.getLocation()}
+💵 *Price*: S$7 per pax
+
+${event.getDescription()}
 
 React di message ini ya kalo mau join!
 `
