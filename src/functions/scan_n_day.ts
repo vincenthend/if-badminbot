@@ -21,8 +21,6 @@ Hello! Kita bakal ada badmin di:
 📍 *Tempat*: ${event.getLocation()}
 💵 *Price*: S$7 per pax
 
-${event.getDescription()}
-
 React di message ini ya kalo mau join!
 `
 

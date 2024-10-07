@@ -4,7 +4,7 @@ import { sendReminder } from 'src/functions/scan_n_day'
 
 export function triggerMissedReminder() {
   try {
-    const events = getNextNDaysEvents(SCAN_RANGE)
+    const events = getNextNDaysEvents(0, 14)
     if (events.length) {
       for (const event of events) {
         sendReminder(event)

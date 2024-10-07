@@ -162,6 +162,8 @@ Reminder hari ini bakal ada badmin di:
 ⏰ *Waktu*: ${formatTime(event.getStartTime())} - ${formatTime(event.getEndTime())}
 📍 *Tempat*: ${event.getLocation()}
 
+${event.getDescription()}
+
 `;
   targetChannels.map(channel => getEventsRegistrationMsg(event, channel)).forEach(([channel_id, messageId]) => {
     try {
@@ -200,7 +202,7 @@ function scanEventsToday() {
   }
 }
 
-const SCAN_RANGE$1 = 14;
+const SCAN_RANGE = 14;
 function sendReminder$2(event) {
   const targetChannels = CHANNEL_IDS.filter(channel => channel.test ? channel.test(event) : true);
   const messageText = `
@@ -211,8 +213,6 @@ Hello! Kita bakal ada badmin di:
 ⏰ *Waktu*: ${formatTime(event.getStartTime())} - ${formatTime(event.getEndTime())}
 📍 *Tempat*: ${event.getLocation()}
 💵 *Price*: S$7 per pax
-
-${event.getDescription()}
 
 React di message ini ya kalo mau join!
 `;
@@ -229,7 +229,7 @@ React di message ini ya kalo mau join!
 }
 function scanEventsNDays() {
   try {
-    const events = getNextNDaysEvents(SCAN_RANGE$1);
+    const events = getNextNDaysEvents(SCAN_RANGE);
     if (events.length) {
       for (const event of events) {
         sendReminder$2(event);
@@ -281,7 +281,7 @@ function sendRegisterReminder() {
 
 function triggerMissedReminder() {
   try {
-    const events = getNextNDaysEvents(SCAN_RANGE);
+    const events = getNextNDaysEvents(0, 14);
     if (events.length) {
       for (const event of events) {
         sendReminder$2(event);

@@ -21,6 +21,8 @@ Reminder hari ini bakal ada badmin di:
 ⏰ *Waktu*: ${formatTime(event.getStartTime() as Date)} - ${formatTime(event.getEndTime() as Date)}
 📍 *Tempat*: ${event.getLocation()}
 
+${event.getDescription()}
+
 `
   targetChannels
     .map((channel) => getEventsRegistrationMsg(event, channel))
