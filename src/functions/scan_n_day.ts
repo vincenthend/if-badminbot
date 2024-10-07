@@ -1,14 +1,14 @@
 import { CHANNEL_IDS, tAPI } from 'src/constants'
 import { CalendarEvent } from 'src/types'
 import { formatDate, formatTime } from 'src/utils'
-import { getNextNDaysEvents } from 'src/utils/events'
+import { getEventsRegistrationMsg, getNextNDaysEvents } from 'src/utils/events'
 import { sendError } from 'src/utils/alert'
 import { TelegramAPI } from 'src/apis/telegram/types'
 import { setMessageIdByEvent } from 'src/utils/store'
 
 const SCAN_RANGE = 14
 
-function sendReminder(event: CalendarEvent) {
+export function sendReminder(event: CalendarEvent) {
   const targetChannels = CHANNEL_IDS.filter((channel) =>
     channel.test ? channel.test(event) : true,
   )
@@ -27,6 +27,8 @@ React di message ini ya kalo mau join!
 `
 
   for (const channel of targetChannels) {
+    const [, messageId] = getEventsRegistrationMsg(event, channel, true)
+    if (messageId) continue
     const message = tAPI(TelegramAPI.SEND_MESSAGE, {
       chat_id: channel.channel_id,
       text: messageText,

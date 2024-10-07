@@ -17,9 +17,13 @@ export function getNextNDaysEvents(start = 0, end: number = start): CalendarEven
   return calendar.getEvents(nextNDaysStart, nextNDaysEnd)
 }
 
-export function getEventsRegistrationMsg(event: CalendarEvent, channel: ChannelData) {
+export function getEventsRegistrationMsg(
+  event: CalendarEvent,
+  channel: ChannelData,
+  ignoreError = false,
+) {
   const messageId = getMessageIdByEvent(event, channel.channel_id)
-  if (!messageId)
+  if (!ignoreError && !messageId)
     sendWarning(`Failed to find message to reply to for event:
 Event: ${event.getTitle()} - ${formatDate(event.getStartTime() as Date)}(${event.getId()}) 
 Channel: ${channel.channel_id} (${channel.channel_name})
