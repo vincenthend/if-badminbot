@@ -6,6 +6,7 @@ const _scanEventsToday = Functions.scanEventsToday
 const _scanEvents5Days = Functions.scanEventsNDays
 const _sendRegisterReminder = Functions.sendRegisterReminder
 const _debugListEvents = Functions.debugListEvents
+const _triggerMissedReminder = Functions.triggerMissedReminder
 
 function doPost(e: GoogleAppsScript.Events.DoPost) {
   try {

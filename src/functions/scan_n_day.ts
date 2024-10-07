@@ -14,7 +14,7 @@ export function sendReminder(event: CalendarEvent) {
   )
   const messageText = `
 *[🏸 Open Registration!]*
-Hello! Kita bakal ada badmin ${SCAN_RANGE} hari lagi di:
+Hello! Kita bakal ada badmin di:
     
 📅 *Tanggal*: ${formatDate(event.getStartTime() as Date)}
 ⏰ *Waktu*: ${formatTime(event.getStartTime() as Date)} - ${formatTime(event.getEndTime() as Date)}
